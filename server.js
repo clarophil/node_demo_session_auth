@@ -13,8 +13,8 @@ users.push(user);
 
 // Check login and password
 let check = function(req, res, next) {
-    console.log(req.session);
-    if (req.session && req.session.auth )
+    console.log(req.session.iduser);
+    if (req.session && (req.session.iduser >=0 ) )
       return next();
     else
       return res.status(401).send("Access denied !  <a href='/login_form'>Login</a>"); 
@@ -56,16 +56,18 @@ app.delete('/user/:iduser', (req, res) => {
     res.send('user delete'); 
 });
 
-// Login and check user account
+// Login and check user account, set session iduser and cookie username
 app.get('/login', function (req, res) {
+    i = 0;
     users.forEach(user => { 
         if(req.query.username === user.username && req.query.password === user.password ) {
-            req.session.auth = true;
+            req.session.iduser = i;
             res.cookie('username',req.query.username);
             res.send("login success!  <a href='/content'>Goto content</a> ");
         }
+        i++;
     });
-    if (! req.session.auth ) {
+    if ( ! (req.session.iduser >= 0)  ) {
         res.send("Login failed ! <a href='/login_form'>Try again</a> ");
     };
   });
@@ -75,13 +77,12 @@ app.get('/login_form',(req, res) => {
     let username = "";
     if (req.cookies && req.cookies.username)
         username = req.cookies.username
-    console.log(username);
         res.render('login_form.ejs', { 'username' : username });
 });
 
 // Redirect to home to content
 app.get('/', (req, res) => {
-    if (req.session.auth) {
+    if (req.session.iduser >= 0) {
         res.redirect('/content');
     } else 
     res.redirect('/login_form');
@@ -90,15 +91,14 @@ app.get('/', (req, res) => {
 // Logout and destroy session
 app.get('/logout', function (req, res) {
     req.session.destroy();
+    res.clearCookie('username');
     res.send("Logout success! ");
     });
 
 // Get content endpoint
 app.get('/content', check, function (req, res) {
-    console.log(req.sessionID);
     res.send("You can only see this after you've logged in.<br> <a href='/logout'>Logout</a> ");
 });
-
 
 let port = 8000;
 app.listen(port , () => console.log('Server is running ' + port ));
