@@ -1,9 +1,6 @@
 let express  = require('express');
 let app = express();
 
-// let cookieParser =require('cookie-parser');
-// app.use(cookieParser());
-
 // Import Body parser
 let bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -91,10 +88,8 @@ app.get('/', (req, res) => {
 });
 
 // Logout and destroy session
-// Logout endpoint
 app.get('/logout', function (req, res) {
     req.session.destroy();
-    //req.session = null;
     res.send("Logout success! ");
     });
 
