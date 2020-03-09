@@ -1,0 +1,15 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/dist-server
+/tmp
+/out-tsc
+/sessions
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+/package-lock.json
