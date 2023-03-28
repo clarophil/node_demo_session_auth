@@ -11,11 +11,16 @@ users.push(user);
 
 // Check login and password
 let check = function(req, res, next) {
-    console.log(req.session.iduser);
-    if (req.session && (req.session.iduser >=0 ) )
-      return next();
-    else
-      return res.status(401).send("Access denied !  <a href='/login_form'>Login</a>"); 
+    console.log(req.session.username);
+    if (req.session && req.session.username )
+    {
+        users.forEach(user => {
+            console.log(req.session.username);
+            if (user.username == req.session.username) return next();
+        });
+    }
+
+    return res.status(401).send("Access denied !  <a href='/login_form'>Login</a>"); 
 };
 
 // Start using session
@@ -42,6 +47,7 @@ app.post('/register_save', (req, res) => {
     let user = { username: req.body.username, password: req.body.password };
     users.push(user);
     console.log(users);
+    req.session.username = req.body.username;
     res.send('user created !   <a href="/content">Goto content</a> ');
 });
 
@@ -62,19 +68,16 @@ app.delete('/user/:iduser', (req, res) => {
 // Login and check user account, set session iduser and cookie username
 app.get('/login',  function (req, res) {
     i = 0;
-    console.log('query ' + req.query)
     users.forEach(user => { 
-        i++;
+        console.log(user);
         if(req.query.username == user.username && req.query.password == user.password ) {
-            req.session.iduser = i;
-            res.cookie('username',req.query.username);
+            req.session.username = req.query.username;
+            res.send("login success!  <a href='/content'>Goto content</a> ");
         }
     });
-    console.log(req.session.iduser);
-    if ( ! (req.session.iduser >= 0)  ) {
+    console.log(req.session.username);
+    if ( ! req.session.username ) {
         res.send("Login failed ! <a href='/login_form'>Try again</a> ");
-    } else {
-        res.send("login success!  <a href='/content'>Goto content</a> ");
     }
   });
 
@@ -98,7 +101,7 @@ app.get('/', logs, (req, res) => {
 app.get('/logout', function (req, res) {
     req.session.destroy();
     res.clearCookie('username');
-    res.send("Logout success! ");
+    res.send("Logout success! <a href='/'>Login</a> ");
     });
 
 // Get content endpoint
